@@ -87,7 +87,15 @@
   </section>
 
   <section class="panel">
-    <div class="row"><h2 style="margin:0">5. Lebensmittel & Preise verwalten</h2><button class="secondary no-print" id="togglePriceList">Liste öffnen</button></div>
+    <div class="row"><h2 style="margin:0">5. Live-Angebote aus Syke</h2><button class="no-print" id="refreshOffers">Preise aktualisieren</button></div>
+    <p class="muted">Verbindung zum offiziellen Angebotsbereich von REWE Philip Monien in Syke. Es werden nur Preise angezeigt, die der Shop öffentlich ausliefert; das ist keine vollständige Produktpreisliste.</p>
+    <div id="liveStatus" class="notice" style="margin:12px 0">Noch nicht aktualisiert. Starte den lokalen Server über die mitgelieferte Anleitung.</div>
+    <div id="liveOffers" class="food-list"></div>
+    <p class="muted">Quelle: <a href="https://www.rewe.de/angebote/syke/540502/rewe-hauptstr-56-58-suurend/" target="_blank" rel="noopener">REWE-Angebote für Hauptstraße 56–58 / Suurend, Syke</a>. Angebotsartikel können zeitlich begrenzt sein.</p>
+  </section>
+
+  <section class="panel">
+    <div class="row"><h2 style="margin:0">6. Lebensmittel & Preise verwalten</h2><button class="secondary no-print" id="togglePriceList">Liste öffnen</button></div>
     <p class="muted">Du kannst auch bei vorgefertigten Lebensmitteln den Preis ändern oder eigene Lebensmittel bearbeiten und löschen.</p>
     <div id="priceList" class="food-list hidden"></div>
   </section>
@@ -180,6 +188,29 @@
     });
   }
   function renderAll(){renderSelect($('foodSelect').value);renderCart();renderTotals();renderPriceList();save()}
+  async function refreshLiveOffers(){
+    const status=$('liveStatus'),root=$('liveOffers');
+    status.textContent='Lade aktuelle Angebote von REWE Syke …';
+    try{
+      const response=await fetch('/api/offers',{cache:'no-store'});
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.error||'Anfrage fehlgeschlagen');
+      root.innerHTML='';
+      if(!data.offers||!data.offers.length){status.textContent=data.message||'Es konnten keine einzelnen Angebote automatisch ausgelesen werden. Nutze den offiziellen REWE-Link oben.';return;}
+      data.offers.forEach(offer=>{
+        const card=document.createElement('div');card.className='food';
+        const top=document.createElement('div');top.className='food-top';
+        const info=document.createElement('div');
+        const name=document.createElement('div');name.className='food-name';name.textContent=offer.name;
+        const detail=document.createElement('div');detail.className='food-sub';detail.textContent=offer.detail||'Aktuelles Marktangebot';
+        info.append(name,detail);
+        const price=document.createElement('strong');price.textContent=offer.price;
+        top.append(info,price);card.append(top);root.append(card);
+      });
+      status.textContent=`Zuletzt aktualisiert: ${data.updated_at||'gerade eben'} · Quelle: offizielle REWE-Marktangebote. ${data.note||''}`;
+    }catch(err){status.textContent='Live-Abruf nicht möglich: '+err.message+'. Prüfe, ob server.py läuft und eine Internetverbindung besteht. Du kannst die offiziellen Angebote über den Link oben öffnen.';}
+  }
+  $('refreshOffers').addEventListener('click',refreshLiveOffers);
   $('foodSelect').addEventListener('change',updateSelectedInfo);
   $('addFood').addEventListener('click',()=>{
     const f=getFood($('foodSelect').value), amount=Number($('amount').value);
@@ -224,6 +255,7 @@
   });
   ['budget','period','goalKcal','goalProtein'].forEach(id=>$(id).addEventListener('input',renderTotals));
   renderAll();
+  if(location.protocol.startsWith("http")) refreshLiveOffers();
 })();
 </script>
 </body>
