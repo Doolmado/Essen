@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REWE Kalorien-, Makro- & Budgetrechner</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1e293b;background:#f3f6f4;--green:#21834b;--green-dark:#176638;--border:#dce5df;--muted:#64748b}
+*{box-sizing:border-box}body{margin:0;padding:24px 14px 50px}.app{max-width:1000px;margin:auto}.hero{display:flex;align-items:center;gap:14px;margin-bottom:18px}.logo{width:54px;height:54px;display:grid;place-items:center;border-radius:16px;background:#dff3e5;color:var(--green-dark);font-size:28px}.hero h1{font-size:clamp(1.3rem,3vw,2rem);margin:0}.hero p{margin:4px 0 0;color:var(--muted)}.panel{background:#fff;border:1px solid var(--border);border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 3px 12px #173a2410}.panel h2{font-size:1.13rem;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:.88rem;font-weight:650}.field small,.muted{color:var(--muted);font-size:.82rem}input,select,button{font:inherit}input,select{width:100%;border:1px solid #cbd5d0;border-radius:10px;padding:10px 11px;background:#fff;color:inherit;min-height:43px}input:focus,select:focus{outline:2px solid #9bd4ad;border-color:var(--green)}button{border:0;border-radius:10px;padding:11px 15px;background:var(--green);color:#fff;font-weight:700;cursor:pointer;min-height:42px}button:hover{background:var(--green-dark)}button.secondary{background:#eef4ef;color:#234532;border:1px solid var(--border)}button.danger{background:#fff0f0;color:#a12c2c;border:1px solid #f0cccc}button.small{padding:6px 10px;min-height:32px;font-size:.85rem}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.stat{background:#f5f8f6;border-radius:13px;padding:14px}.stat .label{font-size:.83rem;color:var(--muted)}.stat strong{display:block;font-size:1.35rem;margin:4px 0}.bar{height:10px;border-radius:99px;background:#e6ece8;overflow:hidden}.bar span{display:block;height:100%;background:var(--green);width:0;transition:width .2s}.bar span.over{background:#d64545}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.food-list{display:grid;gap:10px}.food{border:1px solid var(--border);border-radius:13px;padding:13px}.food-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.food-name{font-weight:750}.food-sub{color:var(--muted);font-size:.85rem;margin-top:3px}.macros{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:10px}.macro{background:#f6f8f7;border-radius:8px;padding:8px;font-size:.8rem}.macro b{display:block;font-size:.94rem;margin-top:3px}.empty{padding:24px;text-align:center;background:#f6f8f7;border-radius:12px;color:var(--muted)}.notice{padding:11px 13px;background:#fff8e7;border:1px solid #f2dfaa;border-radius:10px;font-size:.85rem;color:#72551a}.total-price{font-size:1.7rem;font-weight:800}.divider{height:1px;background:var(--border);margin:16px 0}.hidden{display:none!important}footer{font-size:.82rem;color:var(--muted);line-height:1.5;padding:8px 2px}.pill{display:inline-block;background:#e8f5ec;color:#20663a;border-radius:99px;padding:4px 9px;font-size:.78rem;font-weight:700}
+@media(max-width:650px){body{padding:15px 10px 35px}.panel{padding:15px}.grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.macros{grid-template-columns:repeat(3,minmax(0,1fr))}.food-top{align-items:flex-start}.hero{align-items:flex-start}}
+@media print{body{background:white;padding:0}.panel{box-shadow:none;break-inside:avoid}.no-print,button{display:none!important}.app{max-width:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div class="logo" aria-hidden="true">🥗</div>
+    <div><h1>Kalorien-, Makro- & Budgetrechner</h1><p>Lebensmittel planen · Nährwerte berechnen · Kosten im Blick behalten</p></div>
+  </header>
+
+  <section class="panel">
+    <h2>1. Budget & Tagesziele</h2>
+    <div class="grid">
+      <div class="field"><label for="budget">Budget (€)</label><input id="budget" type="number" min="0" step="0.01" value="10"></div>
+      <div class="field"><label for="period">Budgetzeitraum</label><select id="period"><option value="Tag">Tag</option><option value="Woche">Woche</option><option value="Monat">Monat</option></select></div>
+      <div class="field"><label for="goalKcal">Kalorienziel (kcal/Tag)</label><input id="goalKcal" type="number" min="0" value="2200"></div>
+      <div class="field"><label for="goalProtein">Proteinziel (g/Tag)</label><input id="goalProtein" type="number" min="0" value="140"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>2. Lebensmittel auswählen</h2>
+    <div class="grid">
+      <div class="field"><label for="foodSelect">Vorgefertigtes oder eigenes Lebensmittel</label><select id="foodSelect"></select></div>
+      <div class="field"><label for="amount">Menge (g oder ml)</label><input id="amount" type="number" min="0.1" step="any" value="100"></div>
+    </div>
+    <div id="selectedInfo" class="notice" style="margin-top:13px"></div>
+    <div class="actions no-print">
+      <button id="addFood">＋ Zum Plan hinzufügen</button>
+      <button class="secondary" id="showNewFood">＋ Eigenes Lebensmittel erstellen</button>
+    </div>
+    <div id="newFoodPanel" class="hidden" style="margin-top:18px;border-top:1px solid var(--border);padding-top:17px">
+      <h3 style="margin:0 0 12px">Eigenes Lebensmittel hinzufügen</h3>
+      <p class="muted">Trage die Nährwerte und den Preis pro 100 g bzw. 100 ml ein. Das Lebensmittel wird in deiner Auswahlliste gespeichert.</p>
+      <form id="newFoodForm">
+        <div class="grid">
+          <div class="field"><label for="customName">Name des Lebensmittels *</label><input id="customName" required maxlength="80" placeholder="z. B. Proteinpudding"></div>
+          <div class="field"><label for="customUnit">Mengeneinheit</label><select id="customUnit"><option value="g">Gramm (g)</option><option value="ml">Milliliter (ml)</option></select></div>
+          <div class="field"><label for="customKcal">Kalorien (kcal/100 g oder ml) *</label><input id="customKcal" type="number" min="0" step="any" required placeholder="z. B. 82"></div>
+          <div class="field"><label for="customProtein">Protein (g/100 g oder ml) *</label><input id="customProtein" type="number" min="0" step="any" required placeholder="z. B. 10"></div>
+          <div class="field"><label for="customFat">Fett (g/100 g oder ml) *</label><input id="customFat" type="number" min="0" step="any" required placeholder="z. B. 2"></div>
+          <div class="field"><label for="customCarbs">Kohlenhydrate (g/100 g oder ml) *</label><input id="customCarbs" type="number" min="0" step="any" required placeholder="z. B. 6"></div>
+          <div class="field"><label for="customPrice">Preis pro 100 g oder ml (€) *</label><input id="customPrice" type="number" min="0" step="0.001" required placeholder="z. B. 0,45"></div>
+        </div>
+        <div class="actions"><button type="submit">Lebensmittel speichern</button><button type="button" class="secondary" id="cancelNewFood">Abbrechen</button></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="row"><h2 style="margin-bottom:0">3. Dein Tagesplan</h2><span class="pill" id="itemCount">0 Einträge</span></div>
+    <div id="cart" class="food-list" style="margin-top:14px"></div>
+    <div class="actions no-print">
+      <button class="secondary" id="copyPlan">Plan kopieren</button>
+      <button class="secondary" id="printPlan">Drucken / als PDF speichern</button>
+      <button class="danger" id="clearPlan">Plan leeren</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>4. Auswertung</h2>
+    <div class="row" style="align-items:baseline;margin-bottom:10px"><span class="muted">Gesamtkosten der eingetragenen Mengen</span><span class="total-price" id="totalCost">0,00 €</span></div>
+    <div class="row" style="margin-bottom:7px"><span id="budgetLabel">Budget: 10,00 € pro Tag</span><b id="budgetPercent">0 %</b></div>
+    <div class="bar"><span id="budgetBar"></span></div>
+    <p id="budgetMessage" style="margin:8px 0 16px;font-weight:650"></p>
+    <div class="stats">
+      <div class="stat"><span class="label">🔥 Kalorien</span><strong id="totalKcal">0</strong><span class="label" id="kcalGoalText">0 % des Ziels</span></div>
+      <div class="stat"><span class="label">💪 Protein</span><strong id="totalProtein">0 g</strong><span class="label" id="proteinGoalText">0 % des Ziels</span></div>
+      <div class="stat"><span class="label">🥑 Fett</span><strong id="totalFat">0 g</strong><span class="label">insgesamt</span></div>
+      <div class="stat"><span class="label">🌾 Kohlenhydrate</span><strong id="totalCarbs">0 g</strong><span class="label">insgesamt</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="grid">
+      <div><div class="row"><span class="muted">Kalorien bis zum Tagesziel</span><b id="remainingKcal">2.200 kcal</b></div><div class="bar" style="margin-top:8px"><span id="kcalBar"></span></div></div>
+      <div><div class="row"><span class="muted">Protein bis zum Tagesziel</span><b id="remainingProtein">140 g</b></div><div class="bar" style="margin-top:8px"><span id="proteinBar"></span></div></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="row"><h2 style="margin:0">5. Lebensmittel & Preise verwalten</h2><button class="secondary no-print" id="togglePriceList">Liste öffnen</button></div>
+    <p class="muted">Du kannst auch bei vorgefertigten Lebensmitteln den Preis ändern oder eigene Lebensmittel bearbeiten und löschen.</p>
+    <div id="priceList" class="food-list hidden"></div>
+  </section>
+  <footer>
+    <b>Wichtig:</b> Die voreingestellten Preise sind beispielhafte Richtwerte und keine Live-Preise von REWE. Sie können je nach Markt, Marke, Packungsgröße und Angebot abweichen. Nährwerte sind Näherungswerte. Kosten werden anteilig nach verbrauchter Menge berechnet, nicht als voller Packungspreis. Eigene Lebensmittel und dein Plan werden lokal in diesem Browser gespeichert (localStorage), sofern verfügbar.
+  </footer>
+</div>
+<script>
+(() => {
+  const starterFoods = [
+    {id:'hafer',name:'Haferflocken',unit:'g',kcal:372,p:13.5,f:7,c:58.7,price:0.20},
+    {id:'quark',name:'Magerquark',unit:'g',kcal:67,p:12.5,f:0.2,c:4,price:0.23},
+    {id:'milch',name:'Milch 1,5 %',unit:'ml',kcal:47,p:3.4,f:1.5,c:4.8,price:0.12},
+    {id:'banane',name:'Banane',unit:'g',kcal:89,p:1.1,f:0.3,c:22.8,price:0.20},
+    {id:'ei',name:'Ei',unit:'g',kcal:143,p:12.6,f:9.5,c:0.7,price:0.40},
+    {id:'reis',name:'Reis (trocken)',unit:'g',kcal:354,p:7.4,f:0.9,c:78,price:0.20},
+    {id:'haehnchen',name:'Hähnchenbrust',unit:'g',kcal:110,p:23,f:1.5,c:0,price:1.20},
+    {id:'nudeln',name:'Nudeln (trocken)',unit:'g',kcal:350,p:12,f:1.5,c:70,price:0.18},
+    {id:'linsen',name:'Linsen (trocken)',unit:'g',kcal:352,p:25,f:1.5,c:60,price:0.30},
+    {id:'brokkoli',name:'Brokkoli',unit:'g',kcal:34,p:2.8,f:0.4,c:4,price:0.30},
+    {id:'kartoffeln',name:'Kartoffeln',unit:'g',kcal:77,p:2,f:0.1,c:17,price:0.15},
+    {id:'brot',name:'Vollkornbrot',unit:'g',kcal:230,p:8.5,f:3.5,c:40,price:0.30},
+    {id:'skyr',name:'Skyr natur',unit:'g',kcal:63,p:11,f:0.2,c:4,price:0.35},
+    {id:'apfel',name:'Apfel',unit:'g',kcal:52,p:0.3,f:0.2,c:14,price:0.25},
+    {id:'oel',name:'Rapsöl',unit:'ml',kcal:884,p:0,f:100,c:0,price:0.18},
+    {id:'tofu',name:'Naturtofu',unit:'g',kcal:144,p:16,f:8.7,c:0.5,price:0.80},
+    {id:'thunfisch',name:'Thunfisch (abgetropft)',unit:'g',kcal:116,p:26,f:1,c:0,price:1.10},
+    {id:'joghurt',name:'Naturjoghurt 1,5 %',unit:'g',kcal:47,p:3.8,f:1.5,c:4.7,price:0.18}
+  ];
+  const $ = id => document.getElementById(id);
+  const euro = n => Number(n).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+  const fmt = (n,d=1) => Number(n).toLocaleString('de-DE',{maximumFractionDigits:d,minimumFractionDigits:0});
+  const safeLoad = (key, fallback) => { try { const x=localStorage.getItem(key); return x?JSON.parse(x):fallback; } catch(e) { return fallback; } };
+  let customFoods = safeLoad('foodcalc_custom_foods_v1', []);
+  let cart = safeLoad('foodcalc_cart_v1', []);
+  let priceOverrides = safeLoad('foodcalc_prices_v1', {});
+  let foodIdCounter = 1;
+  const allFoods = () => starterFoods.map(f=>({...f,price:priceOverrides[f.id] ?? f.price})).concat(customFoods.map(f=>({...f,price:priceOverrides[f.id] ?? f.price})));
+  const save = () => { try { localStorage.setItem('foodcalc_custom_foods_v1',JSON.stringify(customFoods)); localStorage.setItem('foodcalc_cart_v1',JSON.stringify(cart)); localStorage.setItem('foodcalc_prices_v1',JSON.stringify(priceOverrides)); } catch(e) {} };
+  const getFood = id => allFoods().find(f=>f.id===id);
+  function renderSelect(selected) {
+    const select=$('foodSelect'), old=selected || select.value;
+    select.innerHTML='';
+    const groups=[['Vorgefertigte Lebensmittel',starterFoods],['Eigene Lebensmittel',customFoods]];
+    groups.forEach(([label,items])=>{if(!items.length)return;const group=document.createElement('optgroup');group.label=label;items.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.name;group.appendChild(o)});select.appendChild(group)});
+    if([...select.options].some(o=>o.value===old))select.value=old;
+    updateSelectedInfo();
+  }
+  function updateSelectedInfo() {
+    const f=getFood($('foodSelect').value); if(!f){$('selectedInfo').textContent='Wähle ein Lebensmittel aus.';return}
+    $('selectedInfo').textContent=`${f.name}: ${f.kcal} kcal · Protein ${f.p} g · Fett ${f.f} g · Kohlenhydrate ${f.c} g · ${euro(f.price)} pro 100 ${f.unit}. Werte jeweils pro 100 ${f.unit}.`;
+  }
+  function renderCart() {
+    const root=$('cart'); root.innerHTML='';
+    $('itemCount').textContent=`${cart.length} ${cart.length===1?'Eintrag':'Einträge'}`;
+    if(!cart.length){root.innerHTML='<div class="empty">Noch keine Lebensmittel im Plan. Wähle oben ein Lebensmittel und füge eine Menge hinzu.</div>';return}
+    cart.forEach((item,index)=>{
+      const div=document.createElement('article');div.className='food';
+      const price=item.price*item.amount/100;
+      div.innerHTML=`<div class="food-top"><div><div class="food-name"></div><div class="food-sub"></div></div><button class="danger small no-print" type="button" aria-label="Eintrag entfernen">Entfernen</button></div><div class="macros"><div class="macro">Kalorien<b>${fmt(item.kcal*item.amount/100,0)} kcal</b></div><div class="macro">Protein<b>${fmt(item.p*item.amount/100)} g</b></div><div class="macro">Fett<b>${fmt(item.f*item.amount/100)} g</b></div><div class="macro">Kohlenhydrate<b>${fmt(item.c*item.amount/100)} g</b></div><div class="macro">Kosten<b>${euro(price)}</b></div></div>`;
+      div.querySelector('.food-name').textContent=item.name;
+      div.querySelector('.food-sub').textContent=`${fmt(item.amount)} ${item.unit} · Preis ${euro(item.price)} pro 100 ${item.unit}`;
+      div.querySelector('button').addEventListener('click',()=>{cart.splice(index,1);save();renderAll()});
+      root.appendChild(div);
+    });
+  }
+  function renderTotals() {
+    const t=cart.reduce((a,x)=>{a.kcal+=x.kcal*x.amount/100;a.p+=x.p*x.amount/100;a.f+=x.f*x.amount/100;a.c+=x.c*x.amount/100;a.cost+=x.price*x.amount/100;return a},{kcal:0,p:0,f:0,c:0,cost:0});
+    const budget=Math.max(0,Number($('budget').value)||0),kg=Math.max(0,Number($('goalKcal').value)||0),pg=Math.max(0,Number($('goalProtein').value)||0);
+    $('totalCost').textContent=euro(t.cost);$('budgetLabel').textContent=`Budget: ${euro(budget)} pro ${$('period').value.toLowerCase()}`;
+    const pct=budget>0?t.cost/budget*100:0;$('budgetPercent').textContent=`${Math.round(pct)} %`;$('budgetBar').style.width=`${Math.min(100,pct)}%`;$('budgetBar').classList.toggle('over',t.cost>budget);
+    $('budgetMessage').textContent=budget===0?'Bitte Budget größer als 0 € eingeben.':t.cost>budget?`Budget um ${euro(t.cost-budget)} überschritten.`:`Noch ${euro(budget-t.cost)} übrig.`;
+    $('budgetMessage').style.color=budget>0&&t.cost>budget?'#c33232':'#21834b';
+    $('totalKcal').textContent=fmt(t.kcal,0);$('totalProtein').textContent=`${fmt(t.p)} g`;$('totalFat').textContent=`${fmt(t.f)} g`;$('totalCarbs').textContent=`${fmt(t.c)} g`;
+    $('kcalGoalText').textContent=kg?`${Math.round(t.kcal/kg*100)} % des Ziels`:'Kein Ziel festgelegt';$('proteinGoalText').textContent=pg?`${Math.round(t.p/pg*100)} % des Ziels`:'Kein Ziel festgelegt';
+    $('remainingKcal').textContent=kg?`${t.kcal>kg?'Ziel überschritten um ':'Noch '}${fmt(Math.abs(kg-t.kcal),0)} kcal`:'—';
+    $('remainingProtein').textContent=pg?`${t.p>pg?'Ziel überschritten um ':'Noch '}${fmt(Math.abs(pg-t.p))} g`:'—';
+    $('kcalBar').style.width=`${kg?Math.min(100,t.kcal/kg*100):0}%`;$('kcalBar').classList.toggle('over',kg>0&&t.kcal>kg);
+    $('proteinBar').style.width=`${pg?Math.min(100,t.p/pg*100):0}%`;$('proteinBar').classList.toggle('over',pg>0&&t.p>pg);
+  }
+  function renderPriceList() {
+    const root=$('priceList');root.innerHTML='';
+    allFoods().forEach(f=>{
+      const div=document.createElement('div');div.className='food';
+      div.innerHTML=`<div class="food-top"><div><div class="food-name"></div><div class="food-sub"></div></div><button class="secondary small no-print edit" type="button">Bearbeiten</button></div>`;
+      div.querySelector('.food-name').textContent=f.name;
+      div.querySelector('.food-sub').textContent=`${f.kcal} kcal · P ${f.p} g · F ${f.f} g · KH ${f.c} g · ${euro(f.price)} / 100 ${f.unit}`;
+      div.querySelector('.edit').addEventListener('click',()=>openEdit(f.id));
+      root.appendChild(div);
+    });
+  }
+  function renderAll(){renderSelect($('foodSelect').value);renderCart();renderTotals();renderPriceList();save()}
+  $('foodSelect').addEventListener('change',updateSelectedInfo);
+  $('addFood').addEventListener('click',()=>{
+    const f=getFood($('foodSelect').value), amount=Number($('amount').value);
+    if(!f||!Number.isFinite(amount)||amount<=0){alert('Bitte wähle ein Lebensmittel und gib eine gültige Menge größer als 0 ein.');return}
+    cart.push({...f,amount,unit:f.unit,key:`${Date.now()}_${Math.random()}`});save();renderAll();
+  });
+  $('showNewFood').addEventListener('click',()=>{$('newFoodPanel').classList.toggle('hidden');if(!$('newFoodPanel').classList.contains('hidden'))$('customName').focus()});
+  $('cancelNewFood').addEventListener('click',()=>{$('newFoodPanel').classList.add('hidden');$('newFoodForm').reset()});
+  $('newFoodForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const name=$('customName').value.trim(),unit=$('customUnit').value;
+    const vals=['customKcal','customProtein','customFat','customCarbs','customPrice'].map(id=>Number($(id).value));
+    if(!name||vals.some(v=>!Number.isFinite(v)||v<0)){alert('Bitte fülle alle Felder mit gültigen, nicht-negativen Zahlen aus.');return}
+    const [kcal,p,f,c,price]=vals;
+    const item={id:`custom_${Date.now()}_${foodIdCounter++}`,name,unit,kcal,p,f,c,price};
+    customFoods.push(item);save();$('newFoodForm').reset();$('newFoodPanel').classList.add('hidden');renderAll();$('foodSelect').value=item.id;updateSelectedInfo();alert(`„${name}“ wurde zu deinen Lebensmitteln hinzugefügt.`);
+  });
+  function openEdit(id){
+    const f=getFood(id);if(!f)return;
+    const name=prompt('Name des Lebensmittels:',f.name);if(name===null)return;
+    const kcal=prompt('Kalorien pro 100 '+f.unit+':',f.kcal);if(kcal===null)return;
+    const p=prompt('Protein (g) pro 100 '+f.unit+':',f.p);if(p===null)return;
+    const fat=prompt('Fett (g) pro 100 '+f.unit+':',f.f);if(fat===null)return;
+    const c=prompt('Kohlenhydrate (g) pro 100 '+f.unit+':',f.c);if(c===null)return;
+    const price=prompt('Preis in Euro pro 100 '+f.unit+':',f.price);if(price===null)return;
+    const vals=[Number(kcal),Number(p),Number(fat),Number(c),Number(price)];
+    if(!name.trim()||vals.some(v=>!Number.isFinite(v)||v<0)){alert('Ungültige Eingabe. Es wurde nichts geändert.');return}
+    const updated={...f,name:name.trim(),kcal:vals[0],p:vals[1],f:vals[2],c:vals[3],price:vals[4]};
+    if(id.startsWith('custom_'))customFoods=customFoods.map(x=>x.id===id?updated:x);
+    else priceOverrides[id]=updated.price;
+    cart=cart.map(x=>x.id===id?{...updated,amount:x.amount,unit:updated.unit,key:x.key}:x);
+    if(id.startsWith('custom_')){save();renderAll()}else{save();renderAll()}
+    if(!id.startsWith('custom_')&&confirm('Möchtest du dieses vorgefertigte Lebensmittel aus der Liste entfernen?')){priceOverrides[id]=updated.price;/* starter foods remain available */}
+  }
+  $('togglePriceList').addEventListener('click',()=>{const hidden=$('priceList').classList.toggle('hidden');$('togglePriceList').textContent=hidden?'Liste öffnen':'Liste schließen'});
+  $('clearPlan').addEventListener('click',()=>{if(confirm('Alle Einträge aus dem Tagesplan entfernen?')){cart=[];save();renderAll()}});
+  $('printPlan').addEventListener('click',()=>window.print());
+  $('copyPlan').addEventListener('click',async()=>{
+    const t=cart.reduce((a,x)=>{a.kcal+=x.kcal*x.amount/100;a.p+=x.p*x.amount/100;a.f+=x.f*x.amount/100;a.c+=x.c*x.amount/100;a.cost+=x.price*x.amount/100;return a},{kcal:0,p:0,f:0,c:0,cost:0});
+    const text='Lebensmittelplan\n'+cart.map(x=>`${x.name}: ${fmt(x.amount)} ${x.unit} — ${euro(x.price*x.amount/100)}`).join('\n')+`\n\nGesamt: ${euro(t.cost)}\nKalorien: ${fmt(t.kcal,0)} kcal\nProtein: ${fmt(t.p)} g\nFett: ${fmt(t.f)} g\nKohlenhydrate: ${fmt(t.c)} g`;
+    try{await navigator.clipboard.writeText(text);alert('Plan wurde kopiert.')}catch(e){prompt('Kopiere deinen Plan:',text)}
+  });
+  ['budget','period','goalKcal','goalProtein'].forEach(id=>$(id).addEventListener('input',renderTotals));
+  renderAll();
+})();
+</script>
+</body>
+</html>
